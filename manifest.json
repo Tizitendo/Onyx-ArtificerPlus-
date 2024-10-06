@@ -1,0 +1,10 @@
+{
+	"name": "ArtificerPlus",
+	"version_number": "0.1.0",
+	"website_url": "https://github.com/Tizitendo/ArtificerPluse",
+	"description": "Adds QOL elements and buffs artis alts",
+	"dependencies": [
+		"ReturnOfModding-ReturnOfModding-1.0.32",
+		"RoRRModdingToolkit-RoRR_Modding_Toolkit-1.1.9"
+	]
+}
