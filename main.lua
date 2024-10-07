@@ -17,10 +17,11 @@ artistar = {}
 StarCount = 0
 test = 0
 BufferedUtil = 0
+altutil = 1
 
 function setup_arti()
+    altutil = 1
     local skills = gm.variable_global_get("class_skill")
-    local artiZ = skills[120] -- primary
     local artiC2 = skills[126] -- alt utility
     local artiV2 = skills[127] -- alt special
     local artiV2Boosted = skills[128] -- alt special scepter
@@ -42,11 +43,6 @@ gm.pre_script_hook(gm.constants.callback_execute, function(self, other, result, 
         -- Hover
         if self.moveUpHold == 1.0 and self.pVspeed > 0.0 then
             self.pVspeed = self.pVspeed * 0.9
-            if test == 0 then
-                -- Helper.log_struct(self)
-                test = 1
-                -- Helper.log_hook(self.skills)
-            end
         end
 
         -- hold special to slow down + artistar control
@@ -62,7 +58,7 @@ gm.pre_script_hook(gm.constants.callback_execute, function(self, other, result, 
         end
 
         -- increase surge distance
-        if BufferedUtil > 0 then
+        if BufferedUtil > 0 and altutil == 1 then
             BufferedUtil = 0
             self.pHspeed = self.pHspeed * 1.5
             self.pVspeed = self.pVspeed * 1.2
@@ -79,7 +75,7 @@ end)
 gm.post_script_hook(gm.constants._skill_system_update_skill_used, function(self, other, result, args)
     if self.class == 13.0 and self.c_skill == true then
         BufferedUtil = 1
-        -- Helper.log_struct(self)
+        Helper.log_struct(self)
     end
 end)
 
@@ -91,5 +87,8 @@ gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, re
         if StarCount > 3 then
             StarCount = 0
         end
+    end
+    if result.value.object_index == gm.constants.oArtiSnap then
+        altutil = 0
     end
 end)
