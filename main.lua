@@ -15,12 +15,11 @@ end)
 
 artistar = {}
 StarCount = 0
-test = 0
 BufferedUtil = 0
-altutil = 1
+player = nil
 
 function setup_arti()
-    altutil = 1
+    player = Player.get_client()
     local skills = gm.variable_global_get("class_skill")
     local artiC2 = skills[126] -- alt utility
     local artiV2 = skills[127] -- alt special
@@ -58,7 +57,7 @@ gm.pre_script_hook(gm.constants.callback_execute, function(self, other, result, 
         end
 
         -- increase surge distance
-        if BufferedUtil > 0 and altutil == 1 then
+        if BufferedUtil > 0 and player:get_active_skill(2).skill_id == 125 then
             BufferedUtil = 0
             self.pHspeed = self.pHspeed * 1.5
             self.pVspeed = self.pVspeed * 1.2
@@ -75,7 +74,6 @@ end)
 gm.post_script_hook(gm.constants._skill_system_update_skill_used, function(self, other, result, args)
     if self.class == 13.0 and self.c_skill == true then
         BufferedUtil = 1
-        Helper.log_struct(self)
     end
 end)
 
@@ -87,8 +85,5 @@ gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, re
         if StarCount > 3 then
             StarCount = 0
         end
-    end
-    if result.value.object_index == gm.constants.oArtiSnap then
-        altutil = 0
     end
 end)
