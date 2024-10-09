@@ -1,4 +1,4 @@
--- ArtificerPlus v0.1.0
+-- ArtificerPlus v1.0.0
 -- Onyx
 log.info("Successfully loaded " .. _ENV["!guid"] .. ".")
 mods.on_all_mods_loaded(function()
@@ -20,24 +20,21 @@ player = nil
 
 function setup_arti()
     player = Player.get_client()
-    local skills = gm.variable_global_get("class_skill")
-    local artiC2 = skills[126] -- alt utility
-    local artiV2 = skills[127] -- alt special
-    local artiV2Boosted = skills[128] -- alt special scepter
+    local artiC2 = Skill.find("ror-artiC2")
+    local artiV2 = Skill.find("ror-artiX2")
+    local artiV2Boosted = Skill.find("ror-artiV2Boosted")
+    artiC2.cooldown = 480.0
+    artiV2.cooldown = 300.0
+    artiV2Boosted.cooldown = 300.0
 
     local speed_multi = 2.0
     gm.sprite_set_speed(gm.constants.sArtiShoot1_1A, speed_multi, 1)
     gm.sprite_set_speed(gm.constants.sArtiShoot1_2A, speed_multi, 1)
     gm.sprite_set_speed(gm.constants.sArtiShoot1_1B, speed_multi, 1)
     gm.sprite_set_speed(gm.constants.sArtiShoot1_2B, speed_multi, 1)
-
-    gm.array_set(artiC2, 6, 480.0) -- cooldown
-    gm.array_set(artiV2, 6, 300.0) -- cooldown
-    gm.array_set(artiV2Boosted, 6, 300.0) -- cooldown
 end
 
 gm.pre_script_hook(gm.constants.callback_execute, function(self, other, result, args)
-
     if args[1].value == 26 and self.class == 13.0 then -- onPlayerStep
         -- Hover
         if self.moveUpHold == 1.0 and self.pVspeed > 0.0 then
@@ -57,7 +54,7 @@ gm.pre_script_hook(gm.constants.callback_execute, function(self, other, result, 
         end
 
         -- increase surge distance
-        if BufferedUtil > 0 and player:get_active_skill(2).skill_id == 125 then
+        if BufferedUtil > 0 and player:get_skill(2).identifier == "artiC2" then
             BufferedUtil = 0
             self.pHspeed = self.pHspeed * 1.5
             self.pVspeed = self.pVspeed * 1.2
