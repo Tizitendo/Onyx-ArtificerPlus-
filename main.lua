@@ -29,20 +29,22 @@ __initialize = function()
         artiC2.cooldown = 480.0
         artiV2.cooldown = 300.0
         artiV2Boosted.cooldown = 300.0
-    
+
         local speed_multi = 2.0
         gm.sprite_set_speed(gm.constants.sArtiShoot1_1A, speed_multi, 1)
         gm.sprite_set_speed(gm.constants.sArtiShoot1_2A, speed_multi, 1)
         gm.sprite_set_speed(gm.constants.sArtiShoot1_1B, speed_multi, 1)
         gm.sprite_set_speed(gm.constants.sArtiShoot1_2B, speed_multi, 1)
     end)
-    
-    Artificer:onStep(function(self)
+
+    Artificer:onStep(function(inst)
+        self = inst.value
+
         -- Hover
         if self.moveUpHold == 1.0 and self.pVspeed > 0.0 then
             self.pVspeed = self.pVspeed * 0.9
         end
-    
+
         -- hold special to slow down + artistar control
         for i = 0, 4 do
             if artistar[i] ~= nil then
@@ -54,7 +56,7 @@ __initialize = function()
                 end
             end
         end
-    
+
         -- increase surge distance
         if BufferedUtil > 0 and player:get_skill(2).identifier == "artiC2" then
             BufferedUtil = 0
@@ -62,21 +64,22 @@ __initialize = function()
             self.pVspeed = self.pVspeed * 1.2
         end
     end)
-
-    gm.post_script_hook(gm.constants._skill_system_update_skill_used, function(self, other, result, args)
-        if self.class == 13.0 and self.c_skill == true then
-            BufferedUtil = 1
-        end
-    end)
-    
-    -- arti star better control
-    gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, result, args)
-        if result.value.object_index == gm.constants.oEfArtiStar then
-            artistar[StarCount] = result.value
-            StarCount = StarCount + 1
-            if StarCount > 3 then
-                StarCount = 0
-            end
-        end
-    end)
 end
+
+-- check if util is used
+gm.post_script_hook(gm.constants._skill_system_update_skill_used, function(self, other, result, args)
+    if self.class == 13.0 and self.c_skill == true then
+        BufferedUtil = 1
+    end
+end)
+
+-- arti star better control
+gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, result, args)
+    if result.value.object_index == gm.constants.oEfArtiStar then
+        artistar[StarCount] = result.value
+        StarCount = StarCount + 1
+        if StarCount > 3 then
+            StarCount = 0
+        end
+    end
+end)
