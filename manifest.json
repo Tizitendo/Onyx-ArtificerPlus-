@@ -1,7 +1,7 @@
 {
 	"name": "ArtificerPlus",
 	"version_number": "1.0.0",
-	"website_url": "https://github.com/Tizitendo/ArtificerPluse",
+	"website_url": "https://github.com/Tizitendo/Onyx-ArtificerPlus-",
 	"description": "Adds QOL elements and buffs artis alts",
 	"dependencies": [
 		"ReturnOfModding-ReturnOfModding-1.0.40",
