@@ -15,11 +15,13 @@ end)
 
 artistar = {}
 StarCount = 0
-BufferedUtil = 0
 player = nil
+artiX2 = nil
 
 __initialize = function()
     Artificer = Survivor.find("ror-arti")
+    artiX2 = Skill.find("ror-artiX2")
+    artiX2.allow_buffered_input = false
 
     Artificer:onInit(function(self)
         player = Player.get_client()
@@ -27,8 +29,10 @@ __initialize = function()
         local artiV2 = Skill.find("ror-artiX2")
         local artiV2Boosted = Skill.find("ror-artiV2Boosted")
         artiC2.cooldown = 480.0
-        artiV2.cooldown = 300.0
-        artiV2Boosted.cooldown = 300.0
+        --artiV2.cooldown = 300.0
+        --artiV2Boosted.cooldown = 300.0
+        artiV2.allow_buffered_input = true
+        artiV2Boosted.allow_buffered_input = true
 
         local speed_multi = 2.0
         gm.sprite_set_speed(gm.constants.sArtiShoot1_1A, speed_multi, 1)
@@ -56,20 +60,27 @@ __initialize = function()
                 end
             end
         end
-
-        -- increase surge distance
-        if BufferedUtil > 0 and player:get_skill(2).identifier == "artiC2" then
-            BufferedUtil = 0
-            self.pHspeed = self.pHspeed * 1.5
-            self.pVspeed = self.pVspeed * 1.2
-        end
     end)
 end
 
--- check if util is used
+-- increase surge distance
 gm.post_script_hook(gm.constants._skill_system_update_skill_used, function(self, other, result, args)
-    if self.class == 13.0 and self.c_skill == true then
-        BufferedUtil = 1
+    if self.class == 13.0 and self.c_skill == true and player:get_skill(2).identifier == "artiC2" then
+        function IncreaseSurgeDistance()
+            self.pHspeed = self.pHspeed * 1.5
+            self.pVspeed = self.pVspeed * 1.2
+        end
+        Alarm.create(IncreaseSurgeDistance, 1)
+    end
+end)
+
+-- Fix Nanospear with backup mag
+gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, result, args)
+    if result.value.object_index == gm.constants.oEfArtiNanobolt then
+        artiX2.required_stock = artiX2.max_stock + 1
+    end
+    if result.value.object_index == gm.constants.oEfExplosion and self.parent ~= nil and self.parent.name == "Artificer" and BufferedX2 ~= nil and BufferedX2.missed then
+        artiX2.required_stock = 1
     end
 end)
 
