@@ -1,4 +1,4 @@
--- ArtificerPlus v1.0.0
+-- ArtificerPlus v1.0.2
 -- Onyx
 log.info("Successfully loaded " .. _ENV["!guid"] .. ".")
 mods.on_all_mods_loaded(function()
@@ -79,7 +79,7 @@ gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, re
     if result.value.object_index == gm.constants.oEfArtiNanobolt then
         artiX2.required_stock = artiX2.max_stock + 1
     end
-    if result.value.object_index == gm.constants.oEfExplosion and self.parent ~= nil and self.parent.name == "Artificer" and BufferedX2 ~= nil and BufferedX2.missed then
+    if result.value.object_index == gm.constants.oEfExplosion and BufferedX2 ~= nil and BufferedX2.missed then
         artiX2.required_stock = 1
     end
 end)
