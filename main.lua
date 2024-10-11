@@ -1,4 +1,4 @@
--- ArtificerPlus v1.0.2
+-- ArtificerPlus v1.0.3
 -- Onyx
 log.info("Successfully loaded " .. _ENV["!guid"] .. ".")
 mods.on_all_mods_loaded(function()
@@ -17,11 +17,11 @@ artistar = {}
 StarCount = 0
 player = nil
 artiX2 = nil
+BufferedX2 = nil
 
 __initialize = function()
     Artificer = Survivor.find("ror-arti")
     artiX2 = Skill.find("ror-artiX2")
-    artiX2.allow_buffered_input = false
 
     Artificer:onInit(function(self)
         player = Player.get_client()
@@ -61,6 +61,10 @@ __initialize = function()
             end
         end
     end)
+
+    Callback.add("onStageStart", "resetnanospear", function() 
+        artiX2.required_stock = 1 
+    end)
 end
 
 -- increase surge distance
@@ -78,9 +82,15 @@ end)
 gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, result, args)
     if result.value.object_index == gm.constants.oEfArtiNanobolt then
         artiX2.required_stock = artiX2.max_stock + 1
+        BufferedX2 = result.value
     end
-    if result.value.object_index == gm.constants.oEfExplosion and BufferedX2 ~= nil and BufferedX2.missed then
-        artiX2.required_stock = 1
+    if result.value.object_index == gm.constants.oEfExplosion and self.parent ~= nil and self.parent.name == "Artificer" then
+        function ResetSpear()
+            if Instance.exists(BufferedX2) == false then
+                artiX2.required_stock = 1
+            end
+        end
+        Alarm.create(ResetSpear, 30)
     end
 end)
 
