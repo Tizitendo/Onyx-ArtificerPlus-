@@ -69,8 +69,12 @@ Initialize(function()
         end
     end)
     Callback.add("onStageStart", "resetnanospear", function() 
-        artiX2.required_stock = 1 
-        artiX.required_stock = 1
+        if artiX2 ~= nil then
+            artiX2.required_stock = 1 
+        end
+        if artiX ~= nil then
+            artiX.required_stock = 1
+        end
     end)
 end)
 
