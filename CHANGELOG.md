@@ -1,3 +1,2 @@
-## 1.3.0
-* fix error that spammed the console
-* added small cooldown to artis Nanobomb to prevent an accidental second use
+## 1.3.1
+* removed testing code
