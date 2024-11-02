@@ -33,7 +33,6 @@ Initialize(function()
         artiV2.allow_buffered_input = true
         artiV2Boosted.allow_buffered_input = true
         artiX.allow_buffered_input = false
-        artiX.max_stock = 2
 
         if params.SurgeBuff then
             artiC2.cooldown = 480.0
