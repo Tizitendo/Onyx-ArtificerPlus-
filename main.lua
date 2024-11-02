@@ -1,4 +1,4 @@
--- ArtificerPlus v1.3.1
+-- ArtificerPlus v1.3.2
 -- Onyx
 log.info("Successfully loaded " .. _ENV["!guid"] .. ".")
 params = {}
