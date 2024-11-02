@@ -1,4 +1,4 @@
--- ArtificerPlus v1.3.1
+-- ArtificerPlus v1.3.2
 -- Onyx
 log.info("Successfully loaded " .. _ENV["!guid"] .. ".")
 params = {}
@@ -22,14 +22,14 @@ BufferedX2 = nil
 
 Initialize(function()
     Artificer = Survivor.find("ror-arti")
+    artiX2 = Skill.find("ror-artiX2")
+    artiX = Skill.find("ror-artiX")
+    local artiC2 = Skill.find("ror-artiC2")
+    local artiV2 = Skill.find("ror-artiV2")
 
     Artificer:onInit(function(self)
         player = Player.get_client()
 
-        artiX2 = Skill.find("ror-artiX2")
-        artiX = Skill.find("ror-artiX")
-        local artiC2 = Skill.find("ror-artiC2")
-        local artiV2 = Skill.find("ror-artiV2")
         local artiV2Boosted = Skill.find("ror-artiV2Boosted")
         artiV2.allow_buffered_input = true
         artiV2Boosted.allow_buffered_input = true
