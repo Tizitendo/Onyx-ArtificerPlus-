@@ -13,23 +13,23 @@ mods.on_all_mods_loaded(function() for k, v in pairs(mods) do if type(v) == "tab
     params = Toml.config_update(_ENV["!guid"], params) -- Load Save
 end)
 
-artistar = {}
-StarCount = 0
-player = nil
-artiX = nil
-artiX2 = nil
-BufferedX2 = nil
+local artistar = {}
+local StarCount = 0
+local player = nil
+local artiX = nil
+local artiX2 = nil
+local BufferedX2 = nil
 
 Initialize(function()
     Artificer = Survivor.find("ror-arti")
-    artiX2 = Skill.find("ror-artiX2")
-    artiX = Skill.find("ror-artiX")
-    local artiC2 = Skill.find("ror-artiC2")
-    local artiV2 = Skill.find("ror-artiV2")
 
     Artificer:onInit(function(self)
         player = Player.get_client()
 
+        artiX2 = Skill.find("ror-artiX2")
+        artiX = Skill.find("ror-artiX")
+        local artiC2 = Skill.find("ror-artiC2")
+        local artiV2 = Skill.find("ror-artiV2")
         local artiV2Boosted = Skill.find("ror-artiV2Boosted")
         artiV2.allow_buffered_input = true
         artiV2Boosted.allow_buffered_input = true
@@ -67,6 +67,11 @@ Initialize(function()
                 end
             end
         end
+
+        -- Fix Nanobomb firing twice with backup mag
+        if artiX.required_stock > 1 and not player.value.x_skill then
+            artiX.required_stock = 1
+        end
     end)
     Callback.add("onStageStart", "resetnanospear", function() 
         if artiX2 ~= nil then
@@ -92,7 +97,7 @@ end)
 gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, result, args)
     -- Fix Nanospear with backup mag
     if result.value.object_index == gm.constants.oEfArtiNanobolt then
-        artiX2.required_stock = artiX2.max_stock + 1
+        artiX2.required_stock = artiX2.max_stock + 5
         BufferedX2 = result.value
     end
     if result.value.object_index == gm.constants.oEfExplosion and self ~= nil and self.parent ~= nil and self.parent.name == "Artificer" then
@@ -106,11 +111,7 @@ gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, re
 
     -- Nanobomb cooldown
     if result.value.object_index == gm.constants.oArtiNanobomb then
-        artiX.required_stock = artiX.max_stock + 1
-        function ResetNanoBomb()
-            artiX.required_stock = 1
-        end
-        Alarm.create(ResetNanoBomb, 45)
+        artiX.required_stock = artiX.max_stock + 5
     end
 
     -- arti star better control
@@ -121,7 +122,6 @@ gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, re
             StarCount = 0
         end
     end
-    --oArtiPlatform
 end)
 
 -- Add ImGui window
