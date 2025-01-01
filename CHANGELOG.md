@@ -1,3 +1,6 @@
+## 1.3.3
+* updated with rmt
+
 ## 1.3.2
 * fixed more error spam
 * fixed changelog
