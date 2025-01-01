@@ -1,5 +1,6 @@
 ## 1.3.3
 * updated with rmt
+* moved Artis secondary fixes to MiscFixes
 
 ## 1.3.2
 * fixed more error spam
