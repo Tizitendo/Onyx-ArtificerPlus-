@@ -1,9 +1,12 @@
--- ArtificerPlus v1.3.2
--- Onyx
 log.info("Successfully loaded " .. _ENV["!guid"] .. ".")
 params = {}
 mods["RoRRModdingToolkit-RoRR_Modding_Toolkit"].auto()
-mods.on_all_mods_loaded(function() for k, v in pairs(mods) do if type(v) == "table" and v.tomlfuncs then Toml = v end end 
+mods.on_all_mods_loaded(function()
+    for k, v in pairs(mods) do
+        if type(v) == "table" and v.tomlfuncs then
+            Toml = v
+        end
+    end
     params = {
         Hover = true,
         Rapidfire = false,
@@ -13,23 +16,22 @@ mods.on_all_mods_loaded(function() for k, v in pairs(mods) do if type(v) == "tab
     params = Toml.config_update(_ENV["!guid"], params) -- Load Save
 end)
 
-artistar = {}
-StarCount = 0
-player = nil
-artiX = nil
-artiX2 = nil
-BufferedX2 = nil
-
 Initialize(function()
+    local artistar = {}
+    local StarCount = 0
+    local player = nil
+    local artiX = nil
+    local artiX2 = nil
+    local BufferedX2 = nil
     Artificer = Survivor.find("ror-arti")
-    artiX2 = Skill.find("ror-artiX2")
-    artiX = Skill.find("ror-artiX")
-    local artiC2 = Skill.find("ror-artiC2")
-    local artiV2 = Skill.find("ror-artiV2")
 
     Artificer:onInit(function(self)
         player = Player.get_client()
 
+        artiX2 = Skill.find("ror-artiX2")
+        artiX = Skill.find("ror-artiX")
+        local artiC2 = Skill.find("ror-artiC2")
+        local artiV2 = Skill.find("ror-artiV2")
         local artiV2Boosted = Skill.find("ror-artiV2Boosted")
         artiV2.allow_buffered_input = true
         artiV2Boosted.allow_buffered_input = true
@@ -67,61 +69,38 @@ Initialize(function()
                 end
             end
         end
+
     end)
-    Callback.add("onStageStart", "resetnanospear", function() 
+    Callback.add("onStageStart", "resetnanospear", function()
         if artiX2 ~= nil then
-            artiX2.required_stock = 1 
+            artiX2.required_stock = 1
         end
         if artiX ~= nil then
             artiX.required_stock = 1
         end
     end)
-end)
 
--- increase surge distance
-gm.post_script_hook(gm.constants._skill_system_update_skill_used, function(self, other, result, args)
-    if self.class == 13.0 and self.c_skill == true and player:get_skill(2).identifier == "artiC2" then
-        function IncreaseSurgeDistance()
-            self.pHspeed = self.pHspeed * 1.5
-            self.pVspeed = self.pVspeed * 1.2
+    -- increase surge distance
+    gm.post_script_hook(gm.constants._skill_system_update_skill_used, function(self, other, result, args)
+        if self.class == 13.0 and self.c_skill == true and player:get_skill(2).identifier == "artiC2" then
+            function IncreaseSurgeDistance()
+                self.pHspeed = self.pHspeed * 1.5
+                self.pVspeed = self.pVspeed * 1.2
+            end
+            Alarm.create(IncreaseSurgeDistance, 1)
         end
-        Alarm.create(IncreaseSurgeDistance, 1)
-    end
-end)
+    end)
 
-gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, result, args)
-    -- Fix Nanospear with backup mag
-    if result.value.object_index == gm.constants.oEfArtiNanobolt then
-        artiX2.required_stock = artiX2.max_stock + 1
-        BufferedX2 = result.value
-    end
-    if result.value.object_index == gm.constants.oEfExplosion and self ~= nil and self.parent ~= nil and self.parent.name == "Artificer" then
-        function ResetSpear()
-            if BufferedX2 ~= nil and Instance.exists(BufferedX2) == false then
-                artiX2.required_stock = 1
+    gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, result, args)
+        -- arti star better control
+        if result.value.object_index == gm.constants.oEfArtiStar and params.SunControl then
+            artistar[StarCount] = result.value
+            StarCount = StarCount + 1
+            if StarCount > 3 then
+                StarCount = 0
             end
         end
-        Alarm.create(ResetSpear, 60)
-    end
-
-    -- Nanobomb cooldown
-    if result.value.object_index == gm.constants.oArtiNanobomb then
-        artiX.required_stock = artiX.max_stock + 1
-        function ResetNanoBomb()
-            artiX.required_stock = 1
-        end
-        Alarm.create(ResetNanoBomb, 45)
-    end
-
-    -- arti star better control
-    if result.value.object_index == gm.constants.oEfArtiStar and params.SunControl then
-        artistar[StarCount] = result.value
-        StarCount = StarCount + 1
-        if StarCount > 3 then
-            StarCount = 0
-        end
-    end
-    --oArtiPlatform
+    end)
 end)
 
 -- Add ImGui window
