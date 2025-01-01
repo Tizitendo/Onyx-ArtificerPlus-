@@ -32,6 +32,10 @@ Initialize(function()
         artiX = Skill.find("ror-artiX")
         local artiC2 = Skill.find("ror-artiC2")
         local artiV2 = Skill.find("ror-artiV2")
+        artiX2 = Skill.find("ror-artiX2")
+        artiX = Skill.find("ror-artiX")
+        local artiC2 = Skill.find("ror-artiC2")
+        local artiV2 = Skill.find("ror-artiV2")
         local artiV2Boosted = Skill.find("ror-artiV2Boosted")
         artiV2.allow_buffered_input = true
         artiV2Boosted.allow_buffered_input = true

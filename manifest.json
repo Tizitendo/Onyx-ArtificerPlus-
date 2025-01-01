@@ -5,7 +5,7 @@
 	"description": "Adds QOL elements and buffs artis alts",
 	"dependencies": [
 		"ReturnOfModding-ReturnOfModding-1.0.48",
-		"RoRRModdingToolkit-RoRR_Modding_Toolkit-1.1.24",
+		"RoRRModdingToolkit-RoRR_Modding_Toolkit-1.2.1",
 		"SmoothSpatula-TomlHelper-1.0.1"
 	]
 }
