@@ -1,6 +1,5 @@
 log.info("Successfully loaded " .. _ENV["!guid"] .. ".")
-params = {}
-mods["RoRRModdingToolkit-RoRR_Modding_Toolkit"].auto()
+mods["RoRRModdingToolkit-RoRR_Modding_Toolkit"].auto(true)
 mods.on_all_mods_loaded(function()
     for k, v in pairs(mods) do
         if type(v) == "table" and v.tomlfuncs then
@@ -17,26 +16,92 @@ mods.on_all_mods_loaded(function()
 end)
 
 Initialize(function()
+    local packetConfig = Packet.new()
+    local PlayerPacket = Packet.new()
     local artistar = {}
     local StarCount = 0
     local player = nil
     local artiX = nil
     local artiX2 = nil
     local BufferedX2 = nil
-    Artificer = Survivor.find("ror-arti")
+    local Artificer = Survivor.find("ror-arti")
+
+    Callback.add(Callback.TYPE.onGameStart, "ArtificerPlus-onGameStart", function()
+        local function GameStart()
+            local playerdata = Player.get_client():get_data()
+            playerdata.Hover = params.Hover
+            playerdata.Rapidfire = params.Rapidfire
+            playerdata.SurgeBuff = params.SurgeBuff
+            playerdata.SunControl = params.SunControl
+            if gm._mod_net_isOnline() then
+                local msg = packetConfig:message_begin()
+                msg:write_instance(Player.get_client())
+                msg:write_byte(params.Hover)
+                msg:write_byte(params.Rapidfire)
+                msg:write_byte(params.SurgeBuff)
+                msg:write_byte(params.SunControl)
+
+                if gm._mod_net_isClient() then
+                    msg:send_to_host()
+                end
+                if gm._mod_net_isHost() then
+                    msg:send_to_all()
+                end
+            end
+        end
+        Alarm.create(GameStart, 2)
+    end)
+
+    packetConfig:onReceived(function(msg)
+        local msgplayer = msg:read_instance()
+        local playerdata = msgplayer:get_data()
+        playerdata.Hover = msg:read_byte()
+        playerdata.Rapidfire = msg:read_byte()
+        playerdata.SurgeBuff = msg:read_byte()
+        playerdata.SunControl = msg:read_byte()
+
+        if gm._mod_net_isHost() then
+            local msg = packetConfig:message_begin()
+            msg:write_instance(Player.get_client())
+            msg:write_byte(playerdata.Hover)
+            msg:write_byte(playerdata.Rapidfire)
+            msg:write_byte(playerdata.SurgeBuff)
+            msg:write_byte(playerdata.SunControl)
+            msg:send_to_all()
+        end
+    end)
+
+    PlayerPacket:onReceived(function(msg)
+        local player = msg:read_instance()
+        player.moveUpHold = msg:read_byte()
+        player.v_skill = msg:read_byte()
+    end)
+
+    Callback.add(Callback.TYPE.onStep, "ArtificerPlus-onStep", function()
+        if gm._mod_net_isOnline() then
+            local player = Player.get_client()
+            local msg = PlayerPacket:message_begin()
+            msg:write_instance(player)
+            msg:write_byte(player.moveUpHold)
+            msg:write_byte(player.v_skill)
+            if gm._mod_net_isHost() then
+                msg:send_to_all()
+            end
+            if gm._mod_net_isClient() then
+                msg:send_to_host()
+            end
+        end
+    end)
 
     Artificer:onInit(function(self)
-        player = Player.get_client()
-
-        artiX2 = Skill.find("ror-artiX2")
-        artiX = Skill.find("ror-artiX")
-        local artiC2 = Skill.find("ror-artiC2")
-        local artiV2 = Skill.find("ror-artiV2")
+        local playerdata = self:get_data()
         artiX2 = Skill.find("ror-artiX2")
         artiX = Skill.find("ror-artiX")
         local artiC2 = Skill.find("ror-artiC2")
         local artiV2 = Skill.find("ror-artiV2")
         local artiV2Boosted = Skill.find("ror-artiV2Boosted")
+        playerdata.artistar = {}
+
         artiV2.allow_buffered_input = true
         artiV2Boosted.allow_buffered_input = true
         artiX.allow_buffered_input = false
@@ -55,39 +120,38 @@ Initialize(function()
     end)
 
     Artificer:onStep(function(inst)
-        self = inst.value
+        local self = inst.value
+        local playerdata = inst:get_data()
 
         -- Hover
-        if self.moveUpHold == 1.0 and self.pVspeed > 0.0 and params.Hover then
+        if gm.bool(self.moveUpHold) and self.pVspeed > 0.0 and playerdata.Hover then
             self.pVspeed = self.pVspeed * 0.9
         end
 
         -- hold special to slow down + artistar control
-        for i = 0, 4 do
-            if artistar[i] ~= nil and params.SunControl then
-                if self.v_skill_buffered > 0.0 then
-                    self.pHspeed = 0.0
-                    artistar[i].pMmax = 6
+        if playerdata.SunControl then
+            for _, star in ipairs(playerdata.artistar) do
+                if star:exists() then
+                    -- log.warning(self.v_skill_buffered)
+                    -- log.warning(self.v_skill)
+                    if gm.bool(self.v_skill) then
+                        self.pHspeed = 0.0
+                        star.pMmax = 6
+                    else
+                        star.pMmax = 2.5
+                    end
                 else
-                    artistar[i].pMmax = 2.5
+                    table.remove(star)
                 end
             end
-        end
-
-    end)
-    Callback.add("onStageStart", "resetnanospear", function()
-        if artiX2 ~= nil then
-            artiX2.required_stock = 1
-        end
-        if artiX ~= nil then
-            artiX.required_stock = 1
         end
     end)
 
     -- increase surge distance
     gm.post_script_hook(gm.constants._skill_system_update_skill_used, function(self, other, result, args)
-        if self.class == 13.0 and self.c_skill == true and player:get_skill(2).identifier == "artiC2" then
-            function IncreaseSurgeDistance()
+        if self.class == 13.0 and self.c_skill == true and Instance.wrap(self):get_skill(2).identifier == "artiC2" and
+            Instance.wrap(self):get_data().SurgeBuff then
+            local function IncreaseSurgeDistance()
                 self.pHspeed = self.pHspeed * 1.5
                 self.pVspeed = self.pVspeed * 1.2
             end
@@ -97,12 +161,15 @@ Initialize(function()
 
     gm.post_script_hook(gm.constants.instance_create_depth, function(self, other, result, args)
         -- arti star better control
-        if result.value.object_index == gm.constants.oEfArtiStar and params.SunControl then
-            artistar[StarCount] = result.value
-            StarCount = StarCount + 1
-            if StarCount > 3 then
-                StarCount = 0
+        -- self is different for client and server
+        if result.value.object_index == gm.constants.oEfArtiStar then
+            local function myFunc(result)
+                local parentdata = Instance.wrap(result.parent):get_data()
+                if gm.bool(parentdata.SunControl) then
+                    table.insert(parentdata.artistar, Instance.wrap(result))
+                end
             end
+            Alarm.create(myFunc, 1, result.value)
         end
     end)
 end)

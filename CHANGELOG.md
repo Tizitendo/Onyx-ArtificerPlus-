@@ -1,3 +1,6 @@
+## 1.4.0
+* Made multiplayer compatible
+
 ## 1.3.3
 * updated with rmt
 * moved Artis secondary fixes to MiscFixes
