@@ -1,3 +1,6 @@
+## 1.4.1
+* fixed some settings crashing
+
 ## 1.4.0
 * Made multiplayer compatible
 

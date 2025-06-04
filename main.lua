@@ -10,7 +10,8 @@ mods.on_all_mods_loaded(function()
         Hover = true,
         Rapidfire = false,
         SurgeBuff = false,
-        SunControl = true
+        SunControl = true,
+        NerfPrimary = false;
     }
     params = Toml.config_update(_ENV["!guid"], params) -- Load Save
 end)
@@ -28,6 +29,9 @@ Initialize(function()
 
     Callback.add(Callback.TYPE.onGameStart, "ArtificerPlus-onGameStart", function()
         local function GameStart()
+            if not gm._mod_game_ingame() then
+                return
+            end
             local playerdata = Player.get_client():get_data()
             playerdata.Hover = params.Hover
             playerdata.Rapidfire = params.Rapidfire
@@ -72,7 +76,7 @@ Initialize(function()
     end)
 
     PlayerPacket:onReceived(function(msg)
-        local player = msg:read_instance()
+        local player = Instance.wrap(msg:read_instance())
         player.moveUpHold = msg:read_byte()
         player.v_skill = msg:read_byte()
     end)
@@ -130,7 +134,7 @@ Initialize(function()
 
         -- hold special to slow down + artistar control
         if playerdata.SunControl then
-            for _, star in ipairs(playerdata.artistar) do
+            for i, star in ipairs(playerdata.artistar) do
                 if star:exists() then
                     -- log.warning(self.v_skill_buffered)
                     -- log.warning(self.v_skill)
@@ -141,7 +145,7 @@ Initialize(function()
                         star.pMmax = 2.5
                     end
                 else
-                    table.remove(star)
+                    table.remove(playerdata.artistar, i)
                 end
             end
         end
